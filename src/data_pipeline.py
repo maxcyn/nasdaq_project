@@ -14,11 +14,13 @@ logger = logging.getLogger(__name__)
 DATABASE_URL = f"postgresql://{os.getenv('DB_USER')}:{os.getenv('DB_PASS')}@{os.getenv('DB_HOST')}:{os.getenv('DB_PORT')}/{os.getenv('DB_NAME')}"
 Base = declarative_base()
 
+
 class StockPrice(Base):
     __tablename__ = 'nasdaq_prices'
     date = Column(Date, primary_key=True)
     ticker = Column(String(10), primary_key=True)
     adj_close = Column(Float, nullable=False)
+
 
 class MarketDataPipeline:
     def __init__(self, db_url, sql_view_path='sql/create_view.sql'):
@@ -59,16 +61,20 @@ class MarketDataPipeline:
             df = data.xs('Close', level=0, axis=1) if isinstance(data.columns, pd.MultiIndex) else data['Close']
         except KeyError:
             df = data['Close']
-        
-        if isinstance(df, pd.Series): df = df.to_frame(name=ticker)
-        else: df.columns = [ticker]
+
+        if isinstance(df, pd.Series):
+            df = df.to_frame(name=ticker)
+
+        else:
+            df.columns = [ticker]
 
         df = df.stack().reset_index()
         df.columns = ['date', 'ticker', 'adj_close']
-        
+
         with self.engine.begin() as conn:
             df.to_sql('nasdaq_prices', conn, if_exists='append', index=False, chunksize=1000)
         logger.info(f"Loaded {len(df)} rows.")
+
 
 if __name__ == "__main__":
     # Ingest 24 years of Nasdaq Data
