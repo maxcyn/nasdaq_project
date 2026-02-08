@@ -54,7 +54,9 @@ class MarketDataPipeline:
     def run(self, ticker, start, end):
         logger.info(f"Fetching {ticker}...")
         data = yf.download(ticker, start=start, end=end, progress=False, auto_adjust=True)
-        if data.empty: return
+        if data.empty:
+            logger.warning(f"No data fetched for ticker {ticker}")
+            return
 
         # Handling MultiIndex complexity of yfinance
         try:

@@ -13,14 +13,13 @@ class StatisticalInference:
     # --- GAUSSIAN MODEL ---
     @staticmethod
     def gaussian_mle(data):
-        """Returns MLE: mu_hat (Mean), sigma^2_hat (Variance)."""
-        return np.mean(data), np.var(data, ddof=0)
+        """Returns MLE: mu_hat (Mean), sigma_hat (Standard Deviation)."""
+        return np.mean(data), np.std(data, ddof=0)
 
     @staticmethod
     def gaussian_log_likelihood(data, mu, sigma):
         """Calculates total Log-Likelihood for Gaussian."""
         n = len(data)
-        # Log L = -(n/2)log(2*pi) - n*log(sigma) - (1/2sigma^2) * sum(errors^2)
         return - (n/2) * np.log(2 * np.pi) - n * np.log(sigma) - np.sum((data - mu)**2) / (2 * sigma**2)
 
     @staticmethod
